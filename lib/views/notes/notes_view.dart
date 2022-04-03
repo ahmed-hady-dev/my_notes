@@ -23,12 +23,6 @@ class _NotesViewState extends State<NotesView> {
   }
 
   @override
-  void dispose() {
-    _notesService.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -68,37 +62,44 @@ class _NotesViewState extends State<NotesView> {
         future: _notesService.getOrCreateUser(email: userEmail),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
-            // case ConnectionState.none:
-            //   break;
-            // case ConnectionState.waiting:
-            //   break;
-            // case ConnectionState.active:
-            //   break;
-            case ConnectionState.waiting:
-              return const Center(child: Text('waiting 1', style: TextStyle()));
             case ConnectionState.done:
-              // return Text('Stream builder', style: const TextStyle());
               return StreamBuilder(
                 stream: _notesService.allNotes,
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
-                    // case ConnectionState.none:
-                    //   break;
                     case ConnectionState.active:
-                      return const Center(child: Text('active', style: TextStyle()));
+                      if (snapshot.hasData) {
+                        final allNotes = snapshot.data as List<DatabaseNote>;
+                        print(allNotes);
+                        return ListView.builder(
+                          itemCount: allNotes.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                allNotes[index].text.toString(),
+                                maxLines: 1,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                     case ConnectionState.waiting:
-                      return const Center(child: Text('waiting 2', style: TextStyle()));
+                      return const Center(child: Text('waiting for all notes', style: TextStyle()));
 
-                    case ConnectionState.done:
-                      return const Center(child: Text('done', style: TextStyle()));
+                    // case ConnectionState.done:
+                    //   return const Center(child: Text('done', style: TextStyle()));
                     default:
-                      return const Center(child: Text('default 2', style: const TextStyle()));
+                      return const Center(child: CircularProgressIndicator());
+                    // return const Center(child: Text('default 2', style: const TextStyle()));
                   }
                 },
               );
             default:
-              return const Center(child: Text('default 1', style: const TextStyle()));
-            // return const Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
           }
         },
       ),
