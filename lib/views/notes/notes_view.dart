@@ -34,7 +34,7 @@ class _NotesViewState extends State<NotesView> {
               onPressed: () {
                 Navigator.of(context).pushNamed(createOrUpdateNoteRoute);
               },
-              icon: Icon(Icons.add)),
+              icon: const Icon(Icons.add)),
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
               switch (value) {
